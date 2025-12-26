@@ -1,0 +1,25 @@
+# FastAPI and server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# AWS SDK
+boto3==1.34.0
+
+# Data validation
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Configuration
+python-dotenv==1.0.0
+pyyaml==6.0.1
+
+# HTTP client
+httpx==0.26.0
+
+# Local Whisper for voice transcription (NO cloud APIs)
+openai-whisper==20231117
+torch>=2.0.0
+
+# Audio processing (required by Whisper)
+ffmpeg-python==0.2.0

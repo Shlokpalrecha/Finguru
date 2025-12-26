@@ -1,0 +1,202 @@
+# FinGuru Accounting Specification
+# This is the source of truth for all accounting rules
+# The reasoning engine MUST follow these specs exactly
+
+version: "1.0"
+currency: "INR"
+
+# Expense Categories with GST Rates
+categories:
+  food:
+    display_name: "Food & Beverages"
+    gst_rate: 5
+    keywords:
+      - chai
+      - tea
+      - coffee
+      - lunch
+      - dinner
+      - breakfast
+      - snacks
+      - restaurant
+      - hotel
+      - canteen
+      - tiffin
+      - khana
+      - nashta
+    
+  transport:
+    display_name: "Transportation"
+    gst_rate: 5
+    keywords:
+      - auto
+      - rickshaw
+      - taxi
+      - uber
+      - ola
+      - petrol
+      - diesel
+      - fuel
+      - bus
+      - train
+      - metro
+      - parking
+      - toll
+    
+  office_supplies:
+    display_name: "Office Supplies"
+    gst_rate: 18
+    keywords:
+      - stationery
+      - pen
+      - paper
+      - printer
+      - ink
+      - cartridge
+      - file
+      - folder
+      - stapler
+      - office
+      - supplies
+    
+  utilities:
+    display_name: "Utilities"
+    gst_rate: 18
+    keywords:
+      - electricity
+      - bijli
+      - water
+      - pani
+      - internet
+      - wifi
+      - phone
+      - mobile
+      - recharge
+      - bill
+    
+  rent:
+    display_name: "Rent & Lease"
+    gst_rate: 18
+    keywords:
+      - rent
+      - kiraya
+      - lease
+      - office space
+      - godown
+      - warehouse
+    
+  professional_services:
+    display_name: "Professional Services"
+    gst_rate: 18
+    keywords:
+      - lawyer
+      - vakil
+      - ca
+      - accountant
+      - consultant
+      - advisor
+      - legal
+      - audit
+    
+  raw_materials:
+    display_name: "Raw Materials"
+    gst_rate: 12
+    keywords:
+      - material
+      - stock
+      - inventory
+      - goods
+      - purchase
+      - wholesale
+      - paint
+      - cement
+      - steel
+      - wood
+      - hardware
+      - construction
+      - building
+    
+  maintenance:
+    display_name: "Repairs & Maintenance"
+    gst_rate: 18
+    keywords:
+      - repair
+      - maintenance
+      - service
+      - fix
+      - mechanic
+      - plumber
+      - electrician
+    
+  miscellaneous:
+    display_name: "Miscellaneous"
+    gst_rate: 18
+    keywords: []
+
+# GST Rules
+gst_rules:
+  threshold_for_registration: 4000000  # 40 lakhs for services
+  threshold_for_goods: 4000000
+  composition_scheme_limit: 15000000  # 1.5 crore
+  
+  # GST is applicable only if vendor is registered
+  vendor_gst_required: true
+  
+  # Input tax credit rules
+  itc_eligible_categories:
+    - office_supplies
+    - professional_services
+    - raw_materials
+    - utilities
+
+# Validation Rules
+validation:
+  confidence_threshold: 0.85
+  max_amount_without_confirmation: 50000
+  require_explanation: true
+  
+  # Amount parsing rules for Hinglish
+  amount_patterns:
+    - pattern: '(\d+)\s*(rupaye|rupees|rs|₹)'
+      group: 1
+    - pattern: '(₹|rs\.?)\s*(\d+)'
+      group: 2
+    - pattern: '(\d+)\s*ka\s*(bill|kharch|expense)'
+      group: 1
+    - pattern: '(\d+)\s*(rupees?\s+)?worth'
+      group: 1
+    - pattern: 'bought\s+(\d+)'
+      group: 1
+
+# Output Schema (strict)
+output_schema:
+  required_fields:
+    - transaction_id
+    - date
+    - amount
+    - category
+    - gst_rate
+    - gst_amount
+    - source
+    - confidence
+    - explanation
+  
+  optional_fields:
+    - vendor_name
+    - vendor_gstin
+    - receipt_url
+    - audio_url
+    - raw_text
+
+# Hinglish Keywords Mapping
+hinglish_mappings:
+  kharch: "expense"
+  kharcha: "expense"
+  paisa: "money"
+  rupaye: "rupees"
+  aaj: "today"
+  kal: "yesterday"
+  bill: "bill"
+  diya: "paid"
+  liya: "bought"
+  kharida: "purchased"
