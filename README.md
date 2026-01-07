@@ -1,140 +1,202 @@
 # FinGuru - AI Financial Assistant for Indian MSMEs
 
-## AWS ImpactX Challenge Submission
+## OpenAI Academy × NxtWave Buildathon Submission
 
-FinGuru is a production-ready AI financial assistant that helps small business owners in India manage their expenses through receipt scanning and voice input in Hinglish.
+FinGuru is a **spec-driven, human-in-the-loop GenAI system** that helps small business owners in India manage their expenses through receipt scanning and voice input in Hinglish.
 
-## 🎯 Problem Statement
+> **This is NOT a chatbot.** GPT-4.1 is used as a constrained reasoning engine with structured outputs, confidence scoring, and mandatory human oversight.
 
-Indian MSMEs struggle with:
-- Manual bookkeeping leading to errors
-- GST compliance complexity
-- Language barriers (most prefer Hinglish)
-- Lack of affordable accounting tools
+---
+
+## 🎯 Why This Approach?
+
+### Why GPT-4.1 (Not a Chatbot)
+Traditional chatbots let AI "decide everything" with free-form responses. FinGuru takes a different approach:
+
+| Chatbot Approach ❌ | FinGuru Approach ✅ |
+|---------------------|---------------------|
+| "Hey AI, categorize this" | AI applies explicit accounting specs |
+| Free-form text output | Strict JSON schema enforcement |
+| AI guesses silently | Confidence scores trigger human review |
+| Hidden reasoning | Every decision is explainable |
+| No constraints | Spec-driven, auditable logic |
+
+### Why Human-in-the-Loop
+```
+IF confidence < 0.85:
+    → Ask user to confirm
+    → Show explanation
+    → Never auto-commit
+```
+
+This builds trust in regulated domains like accounting.
+
+---
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    React Frontend                            │
-│              (Vite + Tailwind + shadcn/ui)                  │
+│              (Clean fintech UI, no chatbot)                 │
 └─────────────────────┬───────────────────────────────────────┘
                       │ REST API
 ┌─────────────────────▼───────────────────────────────────────┐
-│                 FastAPI Backend (EC2)                        │
+│                 FastAPI Backend                              │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │   Receipt   │  │    Voice    │  │     Reasoning       │  │
-│  │   Handler   │  │   Handler   │  │      Engine         │  │
+│  │ Perception  │  │  Reasoning  │  │    Validation       │  │
+│  │   Layer     │  │   Layer     │  │      Layer          │  │
+│  │ (OCR/STT)   │  │  (GPT-4.1)  │  │  (Rules+Confidence) │  │
 │  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘  │
 └─────────┼────────────────┼────────────────────┼─────────────┘
           │                │                    │
 ┌─────────▼────────┐ ┌─────▼──────┐    ┌───────▼───────┐
-│  Amazon Textract │ │   Local    │    │   Spec-Driven │
-│  (Receipt OCR)   │ │  Whisper   │    │   Rules Engine│
-└─────────┬────────┘ └─────┬──────┘    └───────────────┘
-          │                │
-┌─────────▼────────────────▼──────────────────────────────────┐
-│                      Amazon S3                               │
-│            (Receipt Images + Audio Files)                    │
-└─────────────────────────────────────────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────────────────┐
-│                    Amazon DynamoDB                           │
-│              (Ledger Entries + Summaries)                    │
-└─────────────────────────────────────────────────────────────┘
+│  Amazon Textract │ │  GPT-4.1   │    │   Accounting  │
+│  (Receipt OCR)   │ │ Structured │    │     Specs     │
+│                  │ │   Output   │    │   (YAML)      │
+│  Local Whisper   │ │            │    │               │
+│  (Voice STT)     │ │            │    │               │
+└──────────────────┘ └────────────┘    └───────────────┘
 ```
 
-## 🎤 Why Local Whisper (Not AWS Transcribe)
+---
 
-FinGuru uses **OpenAI Whisper running locally** instead of cloud transcription services:
+## 🤖 GPT-4.1 Usage (The Right Way)
 
-### Why This Matters
-1. **No External AI Dependencies**: Runs completely offline after model download
-2. **Better Hinglish Support**: Whisper handles code-switching (Hindi + English) excellently
-3. **Zero Per-Request Cost**: No API calls = no usage fees
-4. **Privacy**: Audio never leaves your server
-5. **Hackathon-Ready**: Works without API keys or cloud quotas
+### System Prompt = Policy
+```python
+"""You are FinGuru's Expense Reasoning Engine.
+You are NOT a chatbot. You are a constrained reasoning engine that:
+1. Analyzes expense data
+2. Applies Indian GST rules from the specification
+3. Produces structured JSON output
+4. Explains every decision"""
+```
 
-### Why NOT AWS Transcribe
-- AWS Transcribe has limited Hinglish support
-- Requires internet connectivity
-- Per-minute billing adds up
-- This project demonstrates we can build AI features WITHOUT being a cloud API wrapper
+### JSON Schema Enforcement
+```python
+response_format={
+    "type": "json_schema",
+    "json_schema": {
+        "name": "expense_reasoning",
+        "strict": True,
+        "schema": {
+            "amount": {"type": "number"},
+            "category": {"type": "string", "enum": [...]},
+            "confidence": {"type": "number"},
+            "rule_applied": {"type": "string"},
+            "explanation": {"type": "string"}
+        }
+    }
+}
+```
 
-### Model Options
-| Model | Size | Speed | Quality |
-|-------|------|-------|---------|
-| tiny | 39MB | Fastest | Basic |
-| base | 74MB | Fast | Good (default) |
-| small | 244MB | Medium | Better |
-| medium | 769MB | Slow | Great |
+### Output Example
+```json
+{
+  "amount": 450,
+  "category": "food",
+  "confidence": 0.91,
+  "rule_applied": "Food services category matched via keywords: chai, restaurant",
+  "gst_reasoning": "5% GST applied per Indian GST rules for food services",
+  "explanation": "This expense is categorized as Food & Beverages based on the mention of 'chai'. GST of 5% is applicable."
+}
+```
 
-Default is `base` - good balance of speed and accuracy for Hinglish.
+---
 
-## 🤖 How GenAI is Used (NOT a Wrapper)
+## 📋 Spec-Driven Development
 
-FinGuru uses Generative AI as a **core reasoning engine**, not a chatbot wrapper:
+All accounting logic is defined in `specs/accounting.yaml`:
 
-1. **Structured Input Only**: AI receives parsed data from Textract/Whisper
-2. **Spec-Driven Rules**: Accounting/GST rules are explicit specs, not prompts
-3. **Strict JSON Output**: All AI outputs are validated against schemas
-4. **Explainability**: Every decision includes human-readable reasoning
-5. **Confidence Scoring**: Low confidence triggers user confirmation
+```yaml
+expense_categories:
+  food:
+    display_name: "Food & Beverages"
+    gst_rate: 5
+    keywords: [chai, tea, coffee, lunch, dinner, restaurant]
+  
+  transport:
+    display_name: "Transportation"
+    gst_rate: 5
+    keywords: [auto, taxi, uber, ola, petrol, diesel]
 
-### Why This Matters
-- Traditional approach: "Hey AI, what category is this?"
-- FinGuru approach: AI applies defined accounting specs to structured data
+rules:
+  explanation_required: true
+  confidence_threshold: 0.85
+
+output_format: strict_json
+```
+
+**Why specs matter:**
+- Source of truth for all decisions
+- Auditable and version-controlled
+- GPT-4.1 references specs, doesn't invent rules
+- Easy to update without code changes
+
+---
 
 ## 🚀 Features
 
 ### 1. Receipt Photo → Ledger Entry
 - Upload receipt image
-- Amazon Textract extracts: amount, date, vendor, GST
-- Reasoning engine categorizes and validates
-- Stored with full audit trail
+- Textract extracts text
+- GPT-4.1 reasons with specs
+- Shows "Why?" explanation
+- Confidence-based confirmation
 
-### 2. Voice Expense → Ledger Entry (Local Whisper)
-- Record Hinglish voice message
-- **Local Whisper** converts to text (no cloud API)
-- Reasoning engine parses and categorizes
-- Example: "Aaj chai ke 120 rupaye kharch hue"
+### 2. Voice Expense → Ledger Entry
+- Speak in Hinglish: "Aaj chai ke 120 rupaye kharch hue"
+- Local Whisper transcribes
+- GPT-4.1 extracts amount, category
+- Human confirms if uncertain
 
-### 3. Daily Summary Dashboard
-- Total spend breakdown
-- Category-wise analysis
+### 3. "Why This Entry?" Button
+Every entry shows:
+- Which rule was applied
+- Why GST rate was chosen
+- Confidence score
+- Full reasoning chain
+
+### 4. CA Companion
+- Daily expense summary
+- Category breakdown
 - GST liability snapshot
-- Explainable categorizations
+- AI-generated insights
 
-## 💰 Free Tier Deployment
+---
 
-| Service | Usage | Free Tier Limit |
-|---------|-------|-----------------|
-| EC2 | Backend API | 750 hrs/month t2.micro |
-| S3 | File storage | 5GB storage |
-| DynamoDB | Database | 25GB + 25 RCU/WCU |
-| Textract | OCR | 1000 pages/month |
-| Whisper | Speech-to-text | **FREE (local)** |
+## 🔒 Human-in-the-Loop Design
+
+```
+┌─────────────────────────────────────────┐
+│           User Input                     │
+│    (Receipt / Voice / Text)             │
+└─────────────────┬───────────────────────┘
+                  ▼
+┌─────────────────────────────────────────┐
+│         GPT-4.1 Reasoning               │
+│    (Constrained, Spec-Driven)           │
+└─────────────────┬───────────────────────┘
+                  ▼
+┌─────────────────────────────────────────┐
+│      Confidence Check                    │
+│                                          │
+│   confidence >= 0.85?                    │
+│      YES → Auto-commit                   │
+│      NO  → Ask user to confirm           │
+└─────────────────────────────────────────┘
+```
+
+---
 
 ## 📦 Quick Start
 
 ### Prerequisites
-- AWS Account with Free Tier
-- Node.js 18+
 - Python 3.11+
-- AWS CLI configured
-- FFmpeg installed (for audio processing)
-
-### Install FFmpeg (Required for Whisper)
-```bash
-# Windows (with Chocolatey)
-choco install ffmpeg
-
-# macOS
-brew install ffmpeg
-
-# Ubuntu/Debian
-sudo apt install ffmpeg
-```
+- Node.js 18+
+- OpenAI API key (for GPT-4.1)
+- AWS credentials (for Textract, S3, DynamoDB)
 
 ### Backend Setup
 ```bash
@@ -142,112 +204,103 @@ cd backend
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your AWS credentials
 
-# First run will download Whisper model (~74MB for base)
-uvicorn main:app --reload
+# Configure environment
+cp .env.example .env
+# Add your OPENAI_API_KEY and AWS credentials
+
+# Run
+uvicorn main:app --reload --port 8000
 ```
 
 ### Frontend Setup
 ```bash
 cd frontend
 npm install
-cp .env.example .env
-# Edit .env with backend URL
 npm run dev
 ```
 
-### AWS Setup
-```bash
-# Create S3 bucket
-aws s3 mb s3://finguru-uploads-{your-id}
+### Demo
+1. Open http://localhost:3000
+2. Upload a receipt → See structured extraction + explanation
+3. Record voice expense → See transcription + categorization
+4. Click "Why?" on any entry → See full reasoning
+5. Check CA tab → See insights
 
-# Create DynamoDB table
-aws dynamodb create-table \
-  --table-name finguru-ledger \
-  --attribute-definitions AttributeName=transaction_id,AttributeType=S \
-  --key-schema AttributeName=transaction_id,KeyType=HASH \
-  --billing-mode PAY_PER_REQUEST
-```
+---
 
-## 🎬 Demo Instructions
+## 🎬 Demo Script for Judges
 
-1. **Start Backend**: `uvicorn main:app --host 0.0.0.0 --port 8000`
-   - First startup downloads Whisper model (~74MB)
-   - Subsequent starts are instant
-2. **Start Frontend**: `npm run dev`
-3. **Demo Receipt Upload**:
-   - Click "Upload Receipt"
-   - Drop a receipt image
-   - Watch extraction + categorization
-   - See explanation for categorization
-4. **Demo Voice Input**:
-   - Click "Record Expense"
-   - Say: "Aaj office supplies ke 500 rupaye kharch hue"
-   - See transcription + categorization
-   - Note: Uses browser's Web Speech API for real-time feedback
-5. **View Dashboard**:
-   - See daily summary
-   - Check GST breakdown
+### Demo 1: Receipt Upload
+1. Upload a restaurant receipt
+2. Show extracted amount, category, GST
+3. Click "Why?" → Show rule applied
+4. Highlight: "This is NOT a chatbot response"
+
+### Demo 2: Voice Input (Hinglish)
+1. Say: "Aaj auto mein 80 rupaye diye"
+2. Show transcription
+3. Show categorization: Transport, 5% GST
+4. Show confidence score
+
+### Demo 3: Low Confidence Handling
+1. Upload ambiguous receipt
+2. Show "Needs Confirmation" prompt
+3. Demonstrate human-in-the-loop
+4. Highlight: "AI never guesses silently"
+
+### Demo 4: Explainability
+1. Open any ledger entry
+2. Show "Why?" explanation
+3. Show rule_applied, gst_reasoning
+4. Highlight: "Every decision is auditable"
+
+---
 
 ## 📁 Project Structure
 
 ```
 finguru/
 ├── backend/
-│   ├── main.py              # FastAPI app (preloads Whisper)
+│   ├── main.py              # FastAPI app
 │   ├── routers/
 │   │   ├── receipts.py      # Receipt upload API
-│   │   ├── voice.py         # Voice upload API (Whisper)
-│   │   └── ledger.py        # Ledger CRUD API
+│   │   ├── voice.py         # Voice upload API
+│   │   ├── ledger.py        # Ledger CRUD
+│   │   └── advisor.py       # CA Companion
 │   ├── services/
-│   │   ├── textract.py      # Amazon Textract integration
-│   │   ├── transcribe.py    # LOCAL Whisper integration
-│   │   ├── reasoning.py     # AI reasoning engine
-│   │   └── dynamodb.py      # DynamoDB operations
-│   ├── specs/
-│   │   └── accounting.yaml  # Accounting rules spec
-│   └── models/
-│       └── schemas.py       # Pydantic models
+│   │   ├── reasoning.py     # GPT-4.1 reasoning engine
+│   │   ├── textract.py      # AWS Textract
+│   │   ├── transcribe.py    # Local Whisper
+│   │   └── dynamodb.py      # Database
+│   └── specs/
+│       └── accounting.yaml  # Accounting rules (source of truth)
 ├── frontend/
-│   ├── src/
-│   │   ├── components/      # React components
-│   │   ├── pages/           # Page components
-│   │   └── lib/             # Utilities
-│   └── package.json
+│   └── src/
+│       ├── pages/           # React pages
+│       └── components/      # UI components
 └── README.md
 ```
 
-## 🔒 Security
+---
 
-- IAM roles with least privilege
-- No secrets in frontend code
-- S3 server-side encryption
-- DynamoDB encryption at rest
-- Input validation on all endpoints
-- Audio processed locally (never sent to external APIs)
+## 🏆 Buildathon Alignment
 
-## 🎯 Voice Flow Output Format
+| Criteria | How FinGuru Addresses It |
+|----------|--------------------------|
+| **Meaningful GPT-4.1 use** | Constrained reasoning engine, not chatbot |
+| **Human-AI collaboration** | Confidence-based confirmation flow |
+| **Explainability** | "Why?" button on every entry |
+| **Real-world problem** | MSME accounting + GST compliance |
+| **Learning value** | Teaches responsible AI in regulated domains |
 
-Every voice entry returns structured JSON:
-```json
-{
-  "transcript": "Aaj chai ke 120 rupaye kharch hue",
-  "amount": 120,
-  "category": "Food",
-  "gst_rate": 5,
-  "gst_amount": 6,
-  "confidence": 0.91,
-  "explanation": "The phrase 'chai' indicates a food expense under food services."
-}
-```
-
-No unstructured text. No hallucinated fields.
+---
 
 ## 👥 Team
 
-Built for AWS ImpactX Challenge - Techfest, IIT Bombay
+Built for OpenAI Academy × NxtWave Buildathon
+
+---
 
 ## 📄 License
 
