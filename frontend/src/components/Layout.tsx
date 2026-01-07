@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -27,7 +27,7 @@ export default function Layout() {
   }, [darkMode]);
 
   const navItems = [
-    { to: '/', icon: LayoutDashboard, label: 'Home' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'Home' },
     { to: '/receipt', icon: Receipt, label: 'Receipt' },
     { to: '/voice', icon: Mic, label: 'Voice' },
     { to: '/ledger', icon: BookOpen, label: 'Ledger' },
@@ -40,7 +40,7 @@ export default function Layout() {
       <header className="glass sticky top-0 z-50 border-b border-gray-200 dark:border-dark-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-xl">₹</span>
               </div>
@@ -48,7 +48,7 @@ export default function Layout() {
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">FinGuru</h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">AI Financial Assistant</p>
               </div>
-            </div>
+            </Link>
             
             <button
               onClick={() => setDarkMode(!darkMode)}

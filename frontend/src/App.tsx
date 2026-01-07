@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import ReceiptUpload from './pages/ReceiptUpload';
 import VoiceUpload from './pages/VoiceUpload';
@@ -10,8 +11,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        {/* Landing page - no layout */}
+        <Route path="/" element={<Landing />} />
+        
+        {/* App pages with layout */}
+        <Route path="/dashboard" element={<Layout />}>
           <Route index element={<Dashboard />} />
+        </Route>
+        <Route element={<Layout />}>
           <Route path="receipt" element={<ReceiptUpload />} />
           <Route path="voice" element={<VoiceUpload />} />
           <Route path="ledger" element={<Ledger />} />
