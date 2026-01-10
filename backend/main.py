@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="FinGuru API",
-    description="AI Financial Assistant for Indian MSMEs - Using Local Whisper",
+    description="AI Financial Assistant for Indian MSMEs",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -57,20 +57,19 @@ async def root():
     return {
         "status": "healthy",
         "service": "FinGuru API",
-        "version": "1.0.0",
-        "whisper": "local"
+        "version": "1.0.0"
     }
 
 
 @app.get("/health")
 async def health():
     """Detailed health check"""
-    # Check if Whisper is loaded
-    whisper_status = "not_loaded"
+    # Check if OpenAI Whisper API is configured
+    whisper_status = "not_configured"
     try:
-        from services.transcribe import _whisper_model
-        if _whisper_model is not None:
-            whisper_status = "loaded"
+        from services.transcribe import client
+        if client is not None:
+            whisper_status = "api_ready"
     except:
         pass
     

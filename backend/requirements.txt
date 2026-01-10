@@ -17,9 +17,5 @@ pyyaml==6.0.1
 # HTTP client
 httpx==0.26.0
 
-# Local Whisper for voice transcription (NO cloud APIs)
-openai-whisper==20231117
-torch>=2.0.0
-
-# Audio processing (required by Whisper)
-ffmpeg-python==0.2.0
+# OpenAI for Whisper API and GPT-4.1
+openai==1.12.0
