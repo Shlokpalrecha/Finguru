@@ -20,14 +20,14 @@ const AnimatedChart = React.memo(() => {
   ];
 
   const expenseData = [
-    { x: 0, y: 95, value: "₹8.2K" },
-    { x: 57, y: 85, value: "₹12.4K" },
-    { x: 114, y: 75, value: "₹18.6K" },
-    { x: 171, y: 80, value: "₹15.2K" },
-    { x: 228, y: 60, value: "₹28.4K" },
-    { x: 285, y: 50, value: "₹32.1K" },
-    { x: 342, y: 55, value: "₹29.8K" },
-    { x: 400, y: 40, value: "₹38.5K" },
+    { x: 0, y: 95, value: "₹8.2K", month: "Jan" },
+    { x: 57, y: 85, value: "₹12.4K", month: "Feb" },
+    { x: 114, y: 75, value: "₹18.6K", month: "Mar" },
+    { x: 171, y: 80, value: "₹15.2K", month: "Apr" },
+    { x: 228, y: 60, value: "₹28.4K", month: "May" },
+    { x: 285, y: 50, value: "₹32.1K", month: "Jun" },
+    { x: 342, y: 55, value: "₹29.8K", month: "Jul" },
+    { x: 400, y: 40, value: "₹38.5K", month: "Aug" },
   ];
 
   // Generate smooth curve path
