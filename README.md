@@ -229,33 +229,6 @@ npm run dev
 
 ---
 
-## 🎬 Demo Script for Judges
-
-### Demo 1: Receipt Upload
-1. Upload a restaurant receipt
-2. Show extracted amount, category, GST
-3. Click "Why?" → Show rule applied
-4. Highlight: "This is NOT a chatbot response"
-
-### Demo 2: Voice Input (Hinglish)
-1. Say: "Aaj auto mein 80 rupaye diye"
-2. Show transcription
-3. Show categorization: Transport, 5% GST
-4. Show confidence score
-
-### Demo 3: Low Confidence Handling
-1. Upload ambiguous receipt
-2. Show "Needs Confirmation" prompt
-3. Demonstrate human-in-the-loop
-4. Highlight: "AI never guesses silently"
-
-### Demo 4: Explainability
-1. Open any ledger entry
-2. Show "Why?" explanation
-3. Show rule_applied, gst_reasoning
-4. Highlight: "Every decision is auditable"
-
----
 
 ## 📁 Project Structure
 
