@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Link } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -7,12 +7,16 @@ import {
   BookOpen,
   Calculator,
   Moon,
-  Sun
+  Sun,
+  LogOut
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
+import { useAuth } from '../context/AuthContext';
 
 export default function Layout() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('darkMode') === 'true' ||
@@ -60,6 +64,31 @@ export default function Layout() {
                 <Moon className="w-5 h-5 text-gray-600" />
               )}
             </button>
+            
+            {/* User menu */}
+            <div className="flex items-center gap-3 ml-3">
+              {user?.isGuest ? (
+                <Link
+                  to="/login"
+                  className="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 text-sm font-medium hover:bg-green-500/30 transition-colors"
+                >
+                  Sign In
+                </Link>
+              ) : (
+                <>
+                  <span className="text-sm text-gray-600 dark:text-gray-300 hidden sm:block">
+                    {user?.name}
+                  </span>
+                  <button
+                    onClick={() => { logout(); navigate('/'); }}
+                    className="p-2 rounded-lg bg-gray-100 dark:bg-dark-800 hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    title="Logout"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>

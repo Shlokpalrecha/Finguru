@@ -7,7 +7,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate('/dashboard');
+    navigate('/register');
   };
 
   const features = [
